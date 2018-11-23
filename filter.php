@@ -676,9 +676,9 @@ class filter_filtercodes extends moodle_text_filter {
         if (stripos($text, '{langx ') !== false) {
             $replace['/\{langx\s+(\w+)\}(.*?)\{\/langx\}/ims'] = '<span lang="$1">$2</span>';
         }
-        // Tag: {lang:plugin}string{/lang} or {lang}string{/lang}.
-        if (stripos($text, '{lang:') !== false) {
-            $text = preg_replace_callback('/\{lang:?(\w*)\}(\w+)\{\/lang\}/is', 'filter_filtercodes_translatecallback', $text);
+        // Tag: {translate:plugin}string{/translate} or {translate}string{/translate}.
+        if (stripos($text, '{translate:') !== false || stripos($text, '{translate}') !== false) {
+            $text = preg_replace_callback('/\{translate:?(\w*)\}(\w+)\{\/translate\}/is', 'filter_filtercodes_translatecallback', $text);
         }
 
         // Conditional block tags.
