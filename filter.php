@@ -26,15 +26,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Translate string (callback)
- *
- * @return string 
- */
-function filter_filtercodes_stringcallback($match) {
-    return get_string($match[2], $match[1]);
-}
-
-/**
  * Extends the moodle_text_filter class to provide plain text support for new tags.
  *
  * @copyright  2017-2018 TNG Consulting Inc. - www.tngconsulting.ca
@@ -666,6 +657,23 @@ class filter_filtercodes extends moodle_text_filter {
             }
         }
 
+        // Tag: {getstring:component_name}stringidentifier{/getstring} or {getstring}stringidentifier{/getstring}.
+        // If component_name (plugin) is not specified, will default to "moodle".
+        if (stripos($text, '{/getstring}') !== false || stripos($text, '{getstring}') !== false) {
+            // Replace {getstring:} tag and parameters with retrieved content.
+            $newtext = preg_replace_callback('/\{getstring:?(\w*)\}(\w+)\{\/getstring\}/is',
+                function($matches) {
+                    if (get_string_manager()->string_exists($matches[2], $matches[1])) {
+                        return get_string($matches[2], $matches[1]);
+                    } else {
+                        return "{getstring" . (!empty($matches[1]) ? ":$matches[1]" : '') . "}$matches[2]{/getstring}";
+                    }
+                }, $text);
+            if ($newtext !== false) {
+                $text = $newtext;
+            }
+        }
+
         // HTML tagging.
 
         // Tag: {nbsp}.
@@ -675,10 +683,6 @@ class filter_filtercodes extends moodle_text_filter {
         // Tag: {langx xx}.
         if (stripos($text, '{langx ') !== false) {
             $replace['/\{langx\s+(\w+)\}(.*?)\{\/langx\}/ims'] = '<span lang="$1">$2</span>';
-        }
-        // Tag: {string:plugin}string{/string} or {string}string{/string}.
-        if (stripos($text, '{string:') !== false || stripos($text, '{string}') !== false) {
-            $text = preg_replace_callback('/\{string:?(\w*)\}(\w+)\{\/string\}/is', 'filter_filtercodes_stringcallback', $text);
         }
 
         // Conditional block tags.
