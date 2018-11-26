@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @return string 
  */
-function filter_filtercodes_translatecallback($match) {
+function filter_filtercodes_stringcallback($match) {
     return get_string($match[2], $match[1]);
 }
 
@@ -676,9 +676,9 @@ class filter_filtercodes extends moodle_text_filter {
         if (stripos($text, '{langx ') !== false) {
             $replace['/\{langx\s+(\w+)\}(.*?)\{\/langx\}/ims'] = '<span lang="$1">$2</span>';
         }
-        // Tag: {translate:plugin}string{/translate} or {translate}string{/translate}.
-        if (stripos($text, '{translate:') !== false || stripos($text, '{translate}') !== false) {
-            $text = preg_replace_callback('/\{translate:?(\w*)\}(\w+)\{\/translate\}/is', 'filter_filtercodes_translatecallback', $text);
+        // Tag: {string:plugin}string{/string} or {string}string{/string}.
+        if (stripos($text, '{string:') !== false || stripos($text, '{string}') !== false) {
+            $text = preg_replace_callback('/\{string:?(\w*)\}(\w+)\{\/string\}/is', 'filter_filtercodes_stringcallback', $text);
         }
 
         // Conditional block tags.
